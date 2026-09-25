@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.alphabetlauncher.data.model.AppInfo
@@ -63,14 +62,13 @@ fun HomeScreen(
         }
         AlphabetBar()
     }
-
 }
 
 
 
 @Composable
 fun ClockAndDate() {
-
+    
     var currentDateTime by remember { mutableStateOf(LocalDateTime.now())}
 
     LaunchedEffect(Unit){
@@ -121,26 +119,5 @@ fun FavouritesApps(apps: List<AppInfo>) {
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    val sampleDrawable = BitmapDrawable(
-        null,
-        Bitmap.createBitmap(40, 40, Bitmap.Config.ARGB_8888)
-    )
-
-    val sampleApps = listOf(
-        AppInfo("Camera", "com.example.camera", sampleDrawable),
-        AppInfo("Gallery", "com.example.gallery", sampleDrawable),
-        AppInfo("Messages", "com.example.messages", sampleDrawable),
-        AppInfo("Settings", "com.example.settings", sampleDrawable),
-        AppInfo("Browser", "com.example.browser", sampleDrawable),
-        AppInfo("Phone", "com.example.phone", sampleDrawable)
-    )
-    AlphabetLauncherTheme {
-        HomeScreen(apps = sampleApps)
     }
 }
