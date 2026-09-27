@@ -1,14 +1,17 @@
 package com.example.alphabetlauncher.ui
 
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
+
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,104 +21,196 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.alphabetlauncher.data.model.AppInfo
 import com.example.alphabetlauncher.ui.components.AlphabetBar
-import com.example.alphabetlauncher.ui.theme.AlphabetLauncherTheme
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun HomeScreen(
     apps: List<AppInfo>
-){
+) {
+    val context = LocalContext.current
+
+    var selectedLetter by remember { mutableStateOf<Char?>(null) }
+    var fingerX by remember { mutableFloatStateOf(0f) }
+    var fingerY by remember { mutableFloatStateOf(0f) }
+
+    BackHandler(enabled = selectedLetter != null) {
+        selectedLetter = null
+    }
+
+    fun launchApp(app: AppInfo) {
+        val intent = context.packageManager
+            .getLaunchIntentForPackage(app.packageName)
+
+        if (intent != null) {
+            context.startActivity(intent)
+        }
+    }
+
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 24.dp)
-    ){
-        Column(
+    ) {
+        Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(
-                    top = 48.dp,
-                    end = 16.dp
+        ) {
+            if (selectedLetter == null) {
+                HomeContent(
+                    apps = apps,
+                    onAppClick = { app ->
+                        launchApp(app)
+                    }
                 )
-        ){
-            ClockAndDate()
-            Spacer(modifier = Modifier.size(32.dp))
-            Text(text = "Favourites")
-            Spacer(modifier = Modifier.size(16.dp))
-            FavouritesApps(
-                apps = apps.take(6)
+            } else {
+                LetterContent(
+                    letter = selectedLetter!!,
+                    apps = apps,
+                    onAppClick = { app ->
+                        launchApp(app)
+                    }
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(72.dp)
+        ) {
+            AlphabetBar(
+                onLetterSelected = { letter ->
+                    selectedLetter = letter
+                },
+                onDragPosition = { x, y->
+                    fingerX = x
+                    fingerY = y
+                },
+                onDragEnd = {
+                }
             )
         }
-        AlphabetBar()
     }
-
 }
 
 
+@Composable
+private fun HomeContent(
+    apps: List<AppInfo>,
+    onAppClick: (AppInfo) -> Unit
+){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                start = 24.dp,
+                top = 48.dp,
+                end = 16.dp
+            )
+    ){
+        ClockAndDate()
+
+        Spacer(modifier = Modifier.size(32.dp))
+
+        Text(text = "Favourites")
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        FavouriteApps(
+            apps = apps.take(6),
+            onAppClick = onAppClick
+        )
+
+    }
+}
 
 @Composable
-fun ClockAndDate() {
+private fun LetterContent(
+    letter: Char,
+    apps: List<AppInfo>,
+    onAppClick: (AppInfo) -> Unit
+) {
 
-    var currentDateTime by remember { mutableStateOf(LocalDateTime.now())}
+    val filteredApps = remember(letter, apps) {
+        apps.filter { app ->
 
-    LaunchedEffect(Unit){
-        while (true){
-            currentDateTime = LocalDateTime.now()
-            delay(1000.milliseconds)
+            app.name
+                .firstOrNull()?.uppercaseChar() == letter
+        }
+            .sortedBy { it.name.lowercase() }
+    }
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                start = 24.dp,
+                top = 48.dp,
+                end = 16.dp
+            )
+    ) {
+        Text(text = letter.toString())
+        Spacer(modifier = Modifier.size(24.dp))
+        if (filteredApps.isEmpty()){
+            Text(
+                text = "No Apps"
+            )
+        }
+        else {
+            FilteredApps(
+                apps = filteredApps,
+                onAppClick = onAppClick
+                )
         }
     }
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-    val dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM")
-
-    Column{
-        Text(
-            text = currentDateTime.format(timeFormatter)
-        )
-        Text(
-            text = currentDateTime.format(dateFormatter)
-        )
-    }
 }
 
-
 @Composable
-fun FavouritesApps(apps: List<AppInfo>) {
+private fun FilteredApps(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        items(
+        items (
             items = apps,
-            key = {it.packageName}
+            key = { it.packageName }
         ){app ->
+
+            val iconBitmap = remember( app.packageName){
+                app.icon
+                    .toBitmap()
+                    .asImageBitmap()
+            }
+
             Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onAppClick(app)
+                    },
+                verticalAlignment =  Alignment.CenterVertically
+            ){
                 Image(
-                    bitmap = app.icon
-                        .toBitmap()
-                        .asImageBitmap(),
+                    bitmap = iconBitmap,
                     contentDescription = app.name,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(48.dp)
                 )
-                Spacer(
-                    modifier = Modifier.width(16.dp)
-                )
+                Spacer(modifier = Modifier.width(16.dp))
+
                 Text(
                     text = app.name
                 )
@@ -124,23 +219,75 @@ fun FavouritesApps(apps: List<AppInfo>) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    val sampleDrawable = BitmapDrawable(
-        null,
-        Bitmap.createBitmap(40, 40, Bitmap.Config.ARGB_8888)
-    )
 
-    val sampleApps = listOf(
-        AppInfo("Camera", "com.example.camera", sampleDrawable),
-        AppInfo("Gallery", "com.example.gallery", sampleDrawable),
-        AppInfo("Messages", "com.example.messages", sampleDrawable),
-        AppInfo("Settings", "com.example.settings", sampleDrawable),
-        AppInfo("Browser", "com.example.browser", sampleDrawable),
-        AppInfo("Phone", "com.example.phone", sampleDrawable)
-    )
-    AlphabetLauncherTheme {
-        HomeScreen(apps = sampleApps)
-    }
-}
+@Composable
+fun ClockAndDate() {
+
+            var currentDateTime by remember { mutableStateOf(LocalDateTime.now()) }
+
+            LaunchedEffect(Unit) {
+                while (true) {
+                    currentDateTime = LocalDateTime.now()
+                    delay(1000.milliseconds)
+
+                }
+            }
+            val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+            val dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM")
+
+            Column {
+                Text(
+                    text = currentDateTime.format(timeFormatter)
+                )
+                Text(
+                    text = currentDateTime.format(dateFormatter)
+                )
+            }
+        }
+
+
+@Composable
+fun FavouriteApps(apps: List<AppInfo>,
+                  onAppClick: (AppInfo) -> Unit) {
+
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                items(
+                    items = apps,
+                    key = { it.packageName }
+                ) { app ->
+
+                    val iconBitmap = remember( app.packageName){
+                        app.icon
+                            .toBitmap()
+                            .asImageBitmap()
+                    }
+
+
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onAppClick(app)
+                        },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            bitmap = iconBitmap,
+                            contentDescription = app.name,
+                            modifier = Modifier.size(40.dp)
+                        )
+                        Spacer(
+                            modifier = Modifier.width(16.dp)
+                        )
+                        Text(
+                            text = app.name
+                        )
+                    }
+                }
+            }
+        }
+
+
+
+
