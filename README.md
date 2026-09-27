@@ -11,6 +11,7 @@ An Android home screen launcher application featuring a fast, interactive A–Z 
 ## Screenshots
 
 <p align="center">
-  <img src="app/sampledata/screenshots/screenshot_1.jpeg" width="300" alt="Home View" />
+  <img src="app/sampledata/screenshots/screenshot_3.jpeg" width="300" alt="Home View" />
+  <img src="app/sampledata/screenshots/screenshot_1.jpeg" width="300" alt="Alphabet Filtered View" />
   <img src="app/sampledata/screenshots/screenshot_2.jpeg" width="300" alt="Alphabet Filtered View" />
 </p>
