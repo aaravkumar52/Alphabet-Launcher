@@ -9,9 +9,11 @@ A fast, lightweight, and modern **Android Home Screen Launcher** built entirely 
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="app/sampledata/screenshots/screenshot_1.jpeg" width="320" alt="Home Screen & Favorites" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="app/sampledata/screenshots/screenshot_2.jpeg" width="320" alt="Alphabet Filtered Apps View" />
+  <img src="app/sampledata/screenshots/screenshot_1.jpeg" width="260" alt="Home Screen & Favorites" />
+  &nbsp;&nbsp;
+  <img src="app/sampledata/screenshots/screenshot_2.jpeg" width="260" alt="Alphabet Filtered View" />
+  &nbsp;&nbsp;
+  <img src="app/sampledata/screenshots/screenshot_3.jpeg" width="260" alt="Alphabet Wave Curve Animation" />
 </p>
 
 ---

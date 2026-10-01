@@ -5,8 +5,9 @@ This module contains the primary Android Application code for **Alphabet Launche
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="sampledata/screenshots/screenshot_1.jpeg" width="300" alt="Home Screen" />
-  <img src="sampledata/screenshots/screenshot_2.jpeg" width="300" alt="Alphabet View" />
+  <img src="sampledata/screenshots/screenshot_1.jpeg" width="240" alt="Home Screen & Favorites" />
+  <img src="sampledata/screenshots/screenshot_2.jpeg" width="240" alt="Alphabet Filtered View" />
+  <img src="sampledata/screenshots/screenshot_3.jpeg" width="240" alt="Alphabet Wave Curve Animation" />
 </p>
 
 ## Features & Highlights
